@@ -8,12 +8,8 @@ const todos = [
     {id: 4, text: 'Todo 4'}
 ]
 const server = http.createServer((req,res) => {
-   
-    res.writeHead(200, {
-        'Content-Type': 'application/json',
-        'X-Powerd-By': 'Node.js'
-    })
 
+    const { method, url } = req
     console.log(req.headers.authorization)
     
     let body = []
@@ -22,15 +18,27 @@ const server = http.createServer((req,res) => {
         body.push(chunk)
     }).on('end', () => {
         body = Buffer.concat(body).toString()
-        console.log(body)
-    })
 
-    res.end(
-        JSON.stringify({
-            success: true,
-            data: todos
+        let statusCode = 404
+        const response = {
+            success: false,
+            data: null
+        }
+
+        if(method === 'GET' && url ==='/todos'){
+            status=200
+            response.success = true
+            response.data = todos
+        }
+
+        res.writeHead(statusCode, {
+            'Content-Type': 'application/json',
+            'X-Powerd-By': 'Node.js'
         })
-    )
+        res.end(
+            JSON.stringify({response})
+        )
+    })
 })
 
 const PORT =5000
