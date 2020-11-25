@@ -7,12 +7,16 @@ const todos = [
     {id: 4, text: 'Todo 4'}
 ]
 const server = http.createServer((req,res) => {
-    res.setHeader('Content-Type', 'text/html')
-    res.setHeader('X-Powerd-By', 'Node.js')
+   
+    res.writeHead(400, {
+        'Content-Type': 'application/json',
+        'X-Powerd-By': 'Node.js'
+    })
     res.end(
         JSON.stringify({
-            success: true,
-            data: todos 
+            success: false,
+            error: 'Please add email',
+            data: null
         })
     )
 })
