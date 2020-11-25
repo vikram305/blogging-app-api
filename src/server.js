@@ -1,3 +1,4 @@
+const { read } = require('fs')
 const http = require('http')
 
 const todos = [
@@ -8,15 +9,26 @@ const todos = [
 ]
 const server = http.createServer((req,res) => {
    
-    res.writeHead(400, {
+    res.writeHead(200, {
         'Content-Type': 'application/json',
         'X-Powerd-By': 'Node.js'
     })
+
+    console.log(req.headers.authorization)
+    
+    let body = []
+
+    req.on('data', chunk => {
+        body.push(chunk)
+    }).on('end', () => {
+        body = Buffer.concat(body).toString()
+        console.log(body)
+    })
+
     res.end(
         JSON.stringify({
-            success: false,
-            error: 'Please add email',
-            data: null
+            success: true,
+            data: todos
         })
     )
 })
