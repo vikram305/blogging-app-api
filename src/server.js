@@ -1,6 +1,6 @@
 const express = require('express')
 const dotenv = require('dotenv')
-
+const morgan = require('morgan')
 
 // Route Files
 const blogs = require('./routes/blogs')
@@ -11,6 +11,12 @@ if(process.env.NODE_ENV !== 'production'){
 }
 
 const app = express()
+
+
+// Dev logging middleware
+if(process.env.NODE_ENV === 'development'){
+    app.use(morgan('dev'))
+}
 
 // Mount Routers
 app.use('/api/v1/blogs',blogs)
