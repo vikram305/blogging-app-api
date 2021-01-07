@@ -10,7 +10,8 @@ exports.getBlogs = async (req,res,next) => {
 
         res.status(200).json({ success: true, count: blogs.length, data: blogs })
     } catch(error){
-        res.status(400).json({ success: false })
+        // res.status(400).json({ success: false })
+        next(error)
     }
 }
 
@@ -29,8 +30,8 @@ exports.getBlog = async (req,res,next) => {
         res.status(200).json({ success: true, data: blog })
     } catch(error) {
         // res.status(400).json({ success: false })
-        // next(error)
-        next(new ErrorResponse(`Blog not found with id of ${req.params.id}`,404))
+        next(error)
+        // next(new ErrorResponse(`Blog not found with id of ${req.params.id}`,404))
     }
 }
 
@@ -46,7 +47,8 @@ exports.createBlog = async (req,res,next) => {
             data: blog
         })
     } catch(error){
-        res.status(400).json({ success: false })
+        // res.status(400).json({ success: false })
+        next(error)
     }
    
 }
@@ -63,12 +65,14 @@ exports.updateBlog = async (req,res,next) => {
         })
     
         if(!blog){
-            return res.status(400).json({ success: false })
+            // return res.status(400).json({ success: false })
+            return next(new ErrorResponse(`Blog not found with id of ${req.params.id}`,404))
         }
     
         res.status(200).json({ success: true, data: blog })
     } catch(error){
-        res.status(400).json({ success: false })
+        // res.status(400).json({ success: false })
+        next(error)
     }
     
 }
@@ -81,11 +85,13 @@ exports.deleteBlog = async (req,res,next) => {
         const blog = await Blog.findByIdAndDelete(req.params.id)
     
         if(!blog){
-            return res.status(400).json({ success: false })
+            // return res.status(400).json({ success: false })
+            return next(new ErrorResponse(`Blog not found with id of ${req.params.id}`,404))
         }
     
         res.status(200).json({ success: true, data: {} })
     } catch(error){
-        res.status(400).json({ success: false })
+        // res.status(400).json({ success: false })
+        next(error)
     }
 } 
