@@ -1,4 +1,5 @@
 const Blog = require('../models/Blog')
+const ErrorResponse = require('../utils/errorResponse')
 
 //@desc     Get all blogs
 //@route    GET /api/v1/blogs
@@ -21,12 +22,15 @@ exports.getBlog = async (req,res,next) => {
         const blog = await Blog.findById(req.params.id)
 
         if(!blog){
-            return res.status(400).json({ success: false })
+            // return res.status(400).json({ success: false })
+            return next(new ErrorResponse(`Blog not found with id of ${req.params.id}`,404))
         }
 
         res.status(200).json({ success: true, data: blog })
     } catch(error) {
-        res.status(400).json({ success: false })
+        // res.status(400).json({ success: false })
+        // next(error)
+        next(new ErrorResponse(`Blog not found with id of ${req.params.id}`,404))
     }
 }
 
