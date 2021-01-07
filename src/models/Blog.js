@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const slugify = require('slugify')
  
 const BlogSchema = new mongoose.Schema({
     title: {
@@ -28,6 +29,13 @@ const BlogSchema = new mongoose.Schema({
         default: Date.now
     }
 
+})
+
+// Create slug from blog name
+BlogSchema.pre('save', function(next){
+    this.slug = slugify(this.title, { lower: true })
+    console.log(`slugify ran: ${this.slug}`)
+    next()
 })
 
 module.exports = mongoose.model('Blog',BlogSchema)
