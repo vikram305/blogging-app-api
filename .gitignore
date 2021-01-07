@@ -104,4 +104,4 @@ dist
 .tern-port
 
 config/
-_data/
+src/_data/

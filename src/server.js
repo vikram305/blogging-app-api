@@ -14,6 +14,7 @@ if(process.env.NODE_ENV !== 'production'){
     console.log(`port from config file : ${process.env.PORT}`)
 }
 
+
 // Connect to database
 connectDB()
 
