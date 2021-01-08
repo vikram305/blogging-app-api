@@ -6,7 +6,42 @@ const ErrorResponse = require('../utils/errorResponse')
 //@route    GET /api/v1/blogs
 //@access   Public
 exports.getBlogs = asyncHandler(async (req,res,next) => {
-    const blogs = await Blog.find()
+
+    let searchQuery = {}
+    let query
+
+    // Copy req.query
+    const reqQuery = {...req.query}
+    console.log(reqQuery)
+    
+    // checking if query string available
+    // ex: blogs?query=blog1
+    if(reqQuery.query){
+        searchQuery = {$or:[{title:{$regex: reqQuery.query, $options: 'i'}},{body:{$regex: reqQuery.query, $options: 'i'}}]}
+    }
+
+    // Finding resource
+    query = Blog.find(searchQuery)
+    // const blogs = await Blog.find(query)
+
+
+    // Selecting fields
+    if(reqQuery.select){
+        const fields = reqQuery.select.split(',').join(' ')
+        console.log(fields)
+        query = query.select(fields)
+    }
+
+    // Sort 
+    if(reqQuery.sort){
+        const  sortBy = reqQuery.sort.split(',').join(' ')
+        query = query.sort(sortBy)
+    } else{
+        query = query.sort('-createdAt')
+    }
+
+    // Executing query
+    const blogs = await query
     res.status(200).json({ success: true, count: blogs.length, data: blogs })
 })
 
