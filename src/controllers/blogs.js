@@ -40,9 +40,21 @@ exports.getBlogs = asyncHandler(async (req,res,next) => {
         query = query.sort('-createdAt')
     }
 
+    const page = parseInt(reqQuery.page,10) || 1
+    const limit = parseInt(reqQuery.limit,10) || 1
+    
+
+    query = query.limit(limit*1)
+                .skip((page-1) *limit)
+
+    // Get total document count
+    const count = await Blog.countDocuments()
+
     // Executing query
     const blogs = await query
-    res.status(200).json({ success: true, count: blogs.length, data: blogs })
+    res.status(200).json({ success: true, count: blogs.length, totalPages: Math.ceil(count/limit),
+        currnetPage: page,
+         data: blogs })
 })
 
 //@desc     Get single blogs
