@@ -7,11 +7,15 @@ const {
     deleteBlog
 } = require('../controllers/blogs')
 
+const Blog = require('../models/Blog')
+const advancedResults = require('../middleware/advancedResults')
+
+
 const router = express.Router()
 
 router
     .route('/')
-    .get(getBlogs)
+    .get(advancedResults(Blog) ,getBlogs)
     .post(createBlog)
 
 router

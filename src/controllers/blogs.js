@@ -7,54 +7,8 @@ const ErrorResponse = require('../utils/errorResponse')
 //@access   Public
 exports.getBlogs = asyncHandler(async (req,res,next) => {
 
-    let searchQuery = {}
-    let query
-
-    // Copy req.query
-    const reqQuery = {...req.query}
-    console.log(reqQuery)
     
-    // checking if query string available
-    // ex: blogs?query=blog1
-    if(reqQuery.query){
-        searchQuery = {$or:[{title:{$regex: reqQuery.query, $options: 'i'}},{body:{$regex: reqQuery.query, $options: 'i'}}]}
-    }
-
-    // Finding resource
-    query = Blog.find(searchQuery)
-    // const blogs = await Blog.find(query)
-
-
-    // Selecting fields
-    if(reqQuery.select){
-        const fields = reqQuery.select.split(',').join(' ')
-        console.log(fields)
-        query = query.select(fields)
-    }
-
-    // Sort 
-    if(reqQuery.sort){
-        const  sortBy = reqQuery.sort.split(',').join(' ')
-        query = query.sort(sortBy)
-    } else{
-        query = query.sort('-createdAt')
-    }
-
-    const page = parseInt(reqQuery.page,10) || 1
-    const limit = parseInt(reqQuery.limit,10) || 1
-    
-
-    query = query.limit(limit*1)
-                .skip((page-1) *limit)
-
-    // Get total document count
-    const count = await Blog.countDocuments()
-
-    // Executing query
-    const blogs = await query
-    res.status(200).json({ success: true, count: blogs.length, totalPages: Math.ceil(count/limit),
-        currnetPage: page,
-         data: blogs })
+    res.status(200).json(res.advancedResults)
 })
 
 //@desc     Get single blogs
