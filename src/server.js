@@ -7,6 +7,7 @@ const colors = require('colors')
 
 // Route Files
 const blogs = require('./routes/blogs')
+const auth = require('./routes/auth')
 
 // Load env vars
 if(process.env.NODE_ENV !== 'production'){
@@ -31,6 +32,7 @@ if(process.env.NODE_ENV === 'development'){
 
 // Mount Routers
 app.use('/api/v1/blogs',blogs)
+app.use('/api/v1/auth', auth)
 
 app.use(errorHandler)
 
