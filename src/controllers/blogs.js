@@ -32,6 +32,7 @@ exports.getBlog = asyncHandler(async (req,res,next) => {
 //@access   Private
 exports.createBlog = asyncHandler(async (req,res,next) => {
 
+    req.body.user = req.user.id
     const blog = await Blog.create(req.body)
     res.status(201).json({
         success: true,

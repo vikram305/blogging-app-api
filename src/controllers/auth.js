@@ -15,7 +15,10 @@ exports.register = asyncHandler(async (req, res, next) => {
         password
     })
 
-    sendTokenResponse(user, 200, res)
+    const registeredUser = await User.findOne({ email })
+
+
+    sendTokenResponse(registeredUser, 200, res)
 })
 
 
@@ -66,6 +69,7 @@ const sendTokenResponse = (user, statusCode, res) => {
         .cookie('token', token, options)
         .json({
             success: true,
+            data: user,
             token
         })
 }
