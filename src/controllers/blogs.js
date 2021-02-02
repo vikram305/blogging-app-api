@@ -4,7 +4,7 @@ const ErrorResponse = require('../utils/errorResponse')
 
 //@desc     Get all blogs
 //@route    GET /api/v1/blogs
-//@access   Public
+//@access   Private
 exports.getBlogs = asyncHandler(async (req,res,next) => {
 
     
@@ -13,7 +13,7 @@ exports.getBlogs = asyncHandler(async (req,res,next) => {
 
 //@desc     Get single blogs
 //@route    GET /api/v1/blogs/:id
-//@access   Public
+//@access   Private
 exports.getBlog = asyncHandler(async (req,res,next) => {
     
     const blog = await Blog.findById(req.params.id)
