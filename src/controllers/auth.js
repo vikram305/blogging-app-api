@@ -8,6 +8,13 @@ const ErrorResponse = require('../utils/errorResponse')
 exports.register = asyncHandler(async (req, res, next) => {
     const {name, email, password} = req.body
 
+    let registeredUser = await User.findOne({ email })
+    console.log(`registered user: ${registeredUser}`)
+
+    if(registeredUser){
+        return next(new ErrorResponse('User with this email already exist.', 400))
+    }
+
     //Create User
     const user = await User.create({
         name,
@@ -15,7 +22,7 @@ exports.register = asyncHandler(async (req, res, next) => {
         password
     })
 
-    const registeredUser = await User.findOne({ email })
+    registeredUser = await User.findOne({ email })
 
 
     sendTokenResponse(registeredUser, 200, res)
@@ -50,6 +57,50 @@ exports.login = asyncHandler(async (req, res, next) => {
     sendTokenResponse(user, 200, res)
 })
 
+
+//@desc     Get current logged in user
+//@route    POST /api/v1/auth/me
+//@access   Private
+exports.getMe = asyncHandler(async (req, res, next) => {
+    const user = await User.findById(req.user.id)
+
+    // console.log('user ', user)
+    
+    res.status(200).json({
+        success: true,
+        data: user
+    })
+})
+
+//@desc     Forgot Password
+//@route    POST /api/v1/auth/forgotpassword
+//@access   Public
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+    
+    if(!req.body.email){
+        return next(new ErrorResponse('Please provide an email', 400))
+    }
+
+    const user = await User.findOne({ email: req.body.email })
+
+    // console.log('user ', user)
+
+    if(!user){
+        return next(new ErrorResponse('There is no user with this email',404))
+    }
+
+    // Get reset token
+    const resetToken =  user.getResetPasswordToken();
+    
+    await user.save()
+    
+    res.status(200).json({
+        success: true,
+        data: user
+    })
+})
+
+
 // Get token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
     // Create token
@@ -73,17 +124,3 @@ const sendTokenResponse = (user, statusCode, res) => {
             token
         })
 }
-
-//@desc     Get current logged in user
-//@route    POST /api/v1/auth/me
-//@access   Private
-exports.getMe = asyncHandler(async (req, res, next) => {
-    const user = await User.findById(req.user.id)
-
-    // console.log('user ', user)
-    
-    res.status(200).json({
-        success: true,
-        data: user
-    })
-})
