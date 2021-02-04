@@ -1,6 +1,8 @@
 const User = require('../models/User')
 const asyncHandler = require('../middleware/async')
 const ErrorResponse = require('../utils/errorResponse')
+const sendEmail = require('../utils/sendEmail')
+const crypto = require('crypto')
 
 //@desc     Register user
 //@route    POST /api/v1/auth/register
@@ -90,22 +92,82 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     }
 
     // Get reset token
-    const resetToken =  user.getResetPasswordToken();
+    const resetToken =  user.getResetPasswordToken()
     
-    await user.save()
+    await user.save({ validateBeforeSave: false })
+
+    // Create reset url
+    const resetUrl = `${req.protocol}://${req.get('host')}api/v1/passwordreset/${resetToken}`
+
+    const message = `You receiving this email because you (or someone else) has requested the reset of 
+    a password. To reset the password please clik on the given link: \n\n ${resetUrl}`
+
+    try{
+        await sendEmail({
+            email: user.email,
+            subject: 'Password Reset',
+            message: message,
+            html: `<p>${message}</p> \n\n
+            <h1><a href="${resetUrl}">  Click here to change password </a> </h1>`
+
+        })
+
+        res.status(200).json({ success: true, data: 'Email sent'})
+    } catch(error){
+        console.log(error)
+        user.resetPasswordToken = undefined
+        user.resetPasswordExpire = undefined
+
+        await user.save({ validateBeforeSave: false })
+
+        return next(new ErrorResponse('Email could not be sent',500))
+    }
+
+})
+
+//@desc     Reset password
+//@route    PUT /api/v1/auth/resetpassword/:resetToken
+//@access   Public
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+
+    // Get hased token
+    const resetPasswordToken = crypto
+        .createHash('sha256')
+        .update(req.params.resetToken)
+        .digest('hex')
     
-    res.status(200).json({
-        success: true,
-        data: user
+    const user = await User.findOne({
+        resetPasswordToken,
+        resetPasswordExpire: { $gt: Date.now() }
     })
+
+    // console.log('user ', user)
+
+    if(!user){
+        return next(new ErrorResponse('Invalid Token',400))
+    }
+
+    // Set new password
+    user.password = req.body.password
+    user.resetPasswordToken = undefined
+    user.resetPasswordExpire = undefined
+
+    await user.save()
+     
+    sendTokenResponse(user, 200, res)
 })
 
 
 // Get token from model, create cookie and send response
-const sendTokenResponse = (user, statusCode, res) => {
+const sendTokenResponse = (userDetail, statusCode, res) => {
     // Create token
-    const token = user.getSignedJwtToken()
+    const token = userDetail.getSignedJwtToken()
 
+
+    //only removing password field from user object
+    const user = userDetail.toObject()
+    delete user.password
+    console.log(`user: ${user}`)
     const options = {
         expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000),
         httpOnly: true
