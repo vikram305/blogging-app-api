@@ -7,6 +7,8 @@ const connectDB = require('./db/db')
 const colors = require('colors')
 const path = require('path')
 const mongoSanitize = require('express-mongo-sanitize')
+const helmet = require('helmet')
+const xss = require('xss-clean')
 
 // Route Files
 const blogs = require('./routes/blogs')
@@ -40,6 +42,12 @@ if(process.env.NODE_ENV === 'development'){
 
 // Sanitize Data
 app.use(mongoSanitize())
+
+// Set security headers
+app.use(helmet())
+
+// Prevent xss attacks
+app.use(xss())
 
 // Mount Routers
 app.use('/api/v1/blogs',blogs)
