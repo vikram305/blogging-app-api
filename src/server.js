@@ -5,6 +5,7 @@ const errorHandler = require('./middleware/error')
 const cookieParser = require('cookie-parser')
 const connectDB = require('./db/db')
 const colors = require('colors')
+const path = require('path')
 
 // Route Files
 const blogs = require('./routes/blogs')
@@ -21,6 +22,9 @@ if(process.env.NODE_ENV !== 'production'){
 connectDB()
 
 const app = express()
+
+const publicDirectoryPath = path.join(__dirname, '../public')
+app.use(express.static(publicDirectoryPath))
 
 //Body parser
 app.use(express.json())

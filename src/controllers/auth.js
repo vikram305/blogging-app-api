@@ -74,6 +74,48 @@ exports.getMe = asyncHandler(async (req, res, next) => {
     })
 })
 
+//@desc     Update user details
+//@route    POST /api/v1/auth/updatedetails
+//@access   Private
+exports.updateDetails = asyncHandler(async (req, res, next) => {
+    const fieldsToUpdate = {
+        name: req.body.name,
+        email: req.body.email
+    }
+
+    const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {
+        new: true,
+        runValidators: true
+    })
+
+    res.status(200).json({
+        success: true,
+        data: user
+    })
+})
+
+//@desc     Update password
+//@route    POST /api/v1/auth/updatepassword
+//@access   Private
+exports.updatePassword = asyncHandler(async (req, res, next) => {
+   const user = await User.findById(req.user.id).select('+password')
+   
+   // Check current password
+   if(!(await user.matchPassword(req.body.currentPassword))){
+       return next(new ErrorResponse('Password is incorrect', 401))
+   }
+
+   user.password = req.body.newPassword
+   await user.save()
+
+    res.status(200).json({
+        success: true,
+        data: "Password changed successfully"
+    })
+})
+
+
+
 //@desc     Forgot Password
 //@route    POST /api/v1/auth/forgotpassword
 //@access   Public
@@ -97,10 +139,10 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     await user.save({ validateBeforeSave: false })
 
     // Create reset url
-    const resetUrl = `${req.protocol}://${req.get('host')}api/v1/passwordreset/${resetToken}`
+    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/passwordreset/${resetToken}`
 
     const message = `You receiving this email because you (or someone else) has requested the reset of 
-    a password. To reset the password please clik on the given link: \n\n ${resetUrl}`
+    a password. To reset the password please visit to the given link: \n\n ${resetUrl}`
 
     try{
         await sendEmail({
