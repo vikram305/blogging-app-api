@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser')
 const connectDB = require('./db/db')
 const colors = require('colors')
 const path = require('path')
+const mongoSanitize = require('express-mongo-sanitize')
 
 // Route Files
 const blogs = require('./routes/blogs')
@@ -36,6 +37,9 @@ app.use(cookieParser())
 if(process.env.NODE_ENV === 'development'){
     app.use(morgan('dev'))
 }
+
+// Sanitize Data
+app.use(mongoSanitize())
 
 // Mount Routers
 app.use('/api/v1/blogs',blogs)
