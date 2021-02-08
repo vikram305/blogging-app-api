@@ -4,7 +4,7 @@ const morgan = require('morgan')
 const errorHandler = require('./middleware/error')
 const cookieParser = require('cookie-parser')
 const connectDB = require('./db/db')
-
+const colors = require('colors')
 const path = require('path')
 const mongoSanitize = require('express-mongo-sanitize')
 const helmet = require('helmet')
